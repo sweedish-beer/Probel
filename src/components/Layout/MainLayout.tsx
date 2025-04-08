@@ -6,6 +6,7 @@ import { Box, CircularProgress } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
 import AuthPage from '../../pages/AuthPage';
 import NotePage from '../Notes/NotePage';
+import FlowchartPage from '../Flowchart/FlowchartPage';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -14,30 +15,30 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const { user, loading } = useAuth();
   const [activePage, setActivePage] = useState('notes');
-  
+
   if (loading) {
     return (
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh' 
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh'
       }}>
         <CircularProgress />
       </Box>
     );
   }
-  
+
   if (!user) {
     return <AuthPage />;
   }
 
   const renderContent = () => {
-    switch(activePage) {
+    switch (activePage) {
       case 'notes':
         return <NotePage />;
       case 'flowcharts':
-        return <div>Flowcharts (Coming Soon)</div>;
+        return <FlowchartPage />;
       case 'ai-chat':
         return <div>AI Chat (Coming Soon)</div>;
       default:
