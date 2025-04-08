@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import AuthPage from '../../pages/AuthPage';
 import NotePage from '../Notes/NotePage';
 import FlowchartPage from '../Flowchart/FlowchartPage';
+import AIChatPage from '../AI/AIChatPage';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -40,7 +41,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       case 'flowcharts':
         return <FlowchartPage />;
       case 'ai-chat':
-        return <div>AI Chat (Coming Soon)</div>;
+        return <AIChatPage />;
       default:
         return children;
     }
