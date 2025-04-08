@@ -1,10 +1,11 @@
 // src/components/Layout/MainLayout.tsx
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState } from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
-import { Box } from '@mui/material';
+import { Box, CircularProgress } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
 import AuthPage from '../../pages/AuthPage';
+import NotePage from '../Notes/NotePage';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -12,23 +13,45 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const { user, loading } = useAuth();
+  const [activePage, setActivePage] = useState('notes');
   
-  // Show loading state or login page if not authenticated
   if (loading) {
-    return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading...</Box>;
+    return (
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh' 
+      }}>
+        <CircularProgress />
+      </Box>
+    );
   }
   
   if (!user) {
     return <AuthPage />;
   }
 
+  const renderContent = () => {
+    switch(activePage) {
+      case 'notes':
+        return <NotePage />;
+      case 'flowcharts':
+        return <div>Flowcharts (Coming Soon)</div>;
+      case 'ai-chat':
+        return <div>AI Chat (Coming Soon)</div>;
+      default:
+        return children;
+    }
+  };
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <Header />
       <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        <Sidebar />
+        <Sidebar onNavigate={setActivePage} activePage={activePage} />
         <Box component="main" sx={{ flex: 1, overflow: 'auto', p: 3 }}>
-          {children}
+          {renderContent()}
         </Box>
       </Box>
     </Box>
