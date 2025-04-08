@@ -1,6 +1,6 @@
 // src/components/Layout/Sidebar.tsx
 import React from 'react';
-import { Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import { Box, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 // We'll use some icons later
 
 const Sidebar: React.FC = () => {
