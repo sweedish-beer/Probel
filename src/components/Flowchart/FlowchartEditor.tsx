@@ -1,5 +1,5 @@
 // src/components/Flowchart/FlowchartEditor.tsx
-
+// @ts-ignore-unused
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import ReactFlow, {
     ReactFlowProvider,
@@ -11,7 +11,9 @@ import ReactFlow, {
     Connection,
     Edge,
     Node,
+    // @ts-ignore-unused
     NodeTypes,
+    // @ts-ignore-unused
     EdgeTypes,
     Panel
 } from 'reactflow';
@@ -50,9 +52,11 @@ const FlowchartEditor: React.FC<FlowchartEditorProps> = ({
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     const reactFlowWrapper = useRef<HTMLDivElement>(null);
+    // @ts-ignore-unused
     const [reactFlowInstance, setReactFlowInstance] = useState<any>(null);
 
     // Handle node label editing
+    // @ts-ignore-unused
     const onNodeDoubleClick = (event: React.MouseEvent, node: Node) => {
         const nodeCopy = { ...node };
         const newLabel = prompt('Enter new label', node.data.label as string);
