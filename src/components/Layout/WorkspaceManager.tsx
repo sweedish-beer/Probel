@@ -1,9 +1,14 @@
 // src/components/Layout/WorkspaceManager.tsx
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import { Box, Tabs, Tab, IconButton } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import ToolGrid from './ToolGrid';
+
+// Define the ref handle interface
+export interface WorkspaceManagerHandle {
+  addTool: (type: 'notes' | 'flowchart' | 'ai-chat', addToSide: boolean) => void;
+}
 
 interface Workspace {
   id: string;
@@ -20,7 +25,8 @@ export interface Tool {
   };
 }
 
-const WorkspaceManager: React.FC = () => {
+//@ts-expect-error
+const WorkspaceManager = forwardRef<WorkspaceManagerHandle>((props, ref) => {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([
     { id: 'default', name: 'Workspace 1', tools: [] }
   ]);
@@ -77,6 +83,11 @@ const WorkspaceManager: React.FC = () => {
     setWorkspaces(newWorkspaces);
   };
 
+  // Expose methods to the parent component via ref
+  useImperativeHandle(ref, () => ({
+    addTool
+  }));
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -118,6 +129,6 @@ const WorkspaceManager: React.FC = () => {
       />
     </Box>
   );
-};
+});
 
 export default WorkspaceManager;

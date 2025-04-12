@@ -1,5 +1,5 @@
 // src/components/Layout/MainLayout.tsx
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   Box,
   AppBar,
@@ -16,7 +16,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useAuth } from '../../contexts/AuthContext';
 import AuthPage from '../../pages/AuthPage';
 import Sidebar from './Sidebar';
-import WorkspaceManager from './WorkspaceManager';
+import WorkspaceManager, { WorkspaceManagerHandle } from './WorkspaceManager';
 
 const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -24,7 +24,9 @@ const MainLayout = () => {
   const { user, loading } = useAuth();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [workspaceManagerRef, setWorkspaceManagerRef] = useState<any>(null);
+  
+  // Use a properly typed ref
+  const workspaceManagerRef = useRef<WorkspaceManagerHandle>(null);
 
   if (loading) {
     return (
@@ -39,8 +41,8 @@ const MainLayout = () => {
   }
 
   const handleSelectTool = (toolType: 'notes' | 'flowchart' | 'ai-chat', addToSide: boolean) => {
-    if (workspaceManagerRef && workspaceManagerRef.addTool) {
-      workspaceManagerRef.addTool(toolType, addToSide);
+    if (workspaceManagerRef.current) {
+      workspaceManagerRef.current.addTool(toolType, addToSide);
     }
 
     // On mobile, close sidebar after selection
@@ -110,7 +112,7 @@ const MainLayout = () => {
         overflow: 'hidden'
       }}>
         <Toolbar /> {/* Spacer to push content below AppBar */}
-        <WorkspaceManager ref={(ref) => setWorkspaceManagerRef(ref)} />
+        <WorkspaceManager ref={workspaceManagerRef} />
       </Box>
     </Box>
   );

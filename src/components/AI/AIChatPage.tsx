@@ -14,26 +14,22 @@ import {
   ListItem,
   ListItemButton,
   ListItemText,
-  Drawer,
-  InputAdornment,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   DialogContentText,
-  useMediaQuery,
-  useTheme,
+  InputAdornment,
   Tooltip
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
-import MenuIcon from '@mui/icons-material/Menu';
 import EditIcon from '@mui/icons-material/Edit';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { aiService } from '../../services/aiService';
 //@ts-expect-error
 import { chatService, Chat, ChatMessage } from '../../services/chatService';
+import ToolWrapper from '../Layout/ToolWrapper';
 
 // Interface for local messages
 interface Message {
@@ -47,35 +43,24 @@ interface Message {
 const drawerWidth = 280;
 
 const AIChatPage: React.FC = () => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [chats, setChats] = useState<Chat[]>([]);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(!isMobile);
   const [isLoadingChats, setIsLoadingChats] = useState(false);
   const [isCreatingChat, setIsCreatingChat] = useState(false);
   const [newChatTitle, setNewChatTitle] = useState('');
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [renameChatTitle, setRenameChatTitle] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Load chats on component mount
   useEffect(() => {
     loadChats();
   }, []);
-
-  // Handle window resize for drawer
-  useEffect(() => {
-    if (!isMobile) {
-      setIsDrawerOpen(true);
-    }
-  }, [isMobile]);
 
   // Load chat messages when selected chat changes
   useEffect(() => {
@@ -308,17 +293,11 @@ const AIChatPage: React.FC = () => {
     }
   };
 
-  const chatListDrawer = (
+  // Extract the chat list drawer as sidebar content
+  const sidebarContent = (
     <Box sx={{ width: drawerWidth, overflow: 'auto' }}>
       <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {!isMobile && (
-            <IconButton onClick={() => setIsDrawerOpen(false)} size="small">
-              <ChevronLeftIcon />
-            </IconButton>
-          )}
-          <Typography variant="h6">AI Chats</Typography>
-        </Box>
+        <Typography variant="h6">AI Chats</Typography>
         <Button
           variant="contained"
           size="small"
@@ -345,11 +324,7 @@ const AIChatPage: React.FC = () => {
             <Button size="small" onClick={() => setIsCreatingChat(false)}>
               Cancel
             </Button>
-            <Button 
-              size="small" 
-              variant="contained" 
-              onClick={handleCreateChat}
-            >
+            <Button size="small" variant="contained" onClick={handleCreateChat}>
               Create
             </Button>
           </Box>
@@ -364,9 +339,7 @@ const AIChatPage: React.FC = () => {
         </Box>
       ) : chats.length === 0 ? (
         <Box sx={{ p: 3, textAlign: 'center' }}>
-          <Typography color="text.secondary">
-            No chats yet
-          </Typography>
+          <Typography color="text.secondary">No chats yet</Typography>
         </Box>
       ) : (
         <List>
@@ -388,12 +361,7 @@ const AIChatPage: React.FC = () => {
             >
               <ListItemButton
                 selected={selectedChat?.id === chat.id}
-                onClick={() => {
-                  setSelectedChat(chat);
-                  if (isMobile) {
-                    setIsDrawerOpen(false);
-                  }
-                }}
+                onClick={() => setSelectedChat(chat)}
               >
                 <ListItemText 
                   primary={chat.title}
@@ -411,237 +379,170 @@ const AIChatPage: React.FC = () => {
     </Box>
   );
 
-  return (
-    <Box sx={{ height: '100%', display: 'flex' }}>
-      {/* Chat list drawer */}
-      <Drawer
-        variant={isMobile ? "temporary" : "persistent"}
-        open={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: drawerWidth,
-            boxSizing: 'border-box',
-            position: 'relative', // Make sure drawer is positioned within the container
-            height: '100%',
-          },
-        }}
-      >
-        {chatListDrawer}
-      </Drawer>
-      
-      {/* Main chat area */}
+  // Main content - chat interface
+  const mainContent = (
+    <>
+      {/* Chat header with title editing */}
       <Box sx={{ 
-        flex: 1, 
+        p: 2, 
         display: 'flex', 
-        flexDirection: 'column',
-        height: '100%',
-        overflow: 'hidden'
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        borderBottom: 1,
+        borderColor: 'divider'
       }}>
-        {/* Chat header */}
-        <Box sx={{ 
-          p: 2, 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          borderBottom: 1,
-          borderColor: 'divider'
-        }}>
+        {/* Header content - Title and edit controls */}
+        {isEditingTitle ? (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <IconButton 
-              onClick={() => setIsDrawerOpen(!isDrawerOpen)} 
-              edge="start"
-            >
-              <MenuIcon />
-            </IconButton>
-            
-            {isEditingTitle ? (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <TextField
-                  size="small"
-                  value={renameChatTitle}
-                  onChange={(e) => setRenameChatTitle(e.target.value)}
-                  autoFocus
-                />
-                <Button size="small" onClick={() => setIsEditingTitle(false)}>
-                  Cancel
-                </Button>
-                <Button 
-                  size="small" 
-                  variant="contained" 
-                  onClick={handleRenameChat}
-                >
-                  Save
-                </Button>
-              </Box>
-            ) : (
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant="h6">
-                  {selectedChat?.title || 'New Chat'}
-                </Typography>
-                {selectedChat && (
-                  <Tooltip title="Rename chat">
-                    <IconButton 
-                      size="small" 
-                      onClick={() => {
-                        setRenameChatTitle(selectedChat.title);
-                        setIsEditingTitle(true);
-                      }}
-                    >
-                      <EditIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                )}
-              </Box>
-            )}
+            <TextField
+              size="small"
+              value={renameChatTitle}
+              onChange={(e) => setRenameChatTitle(e.target.value)}
+              autoFocus
+            />
+            <Button size="small" onClick={() => setIsEditingTitle(false)}>Cancel</Button>
+            <Button size="small" variant="contained" onClick={handleRenameChat}>Save</Button>
           </Box>
-          
-          {selectedChat && !isEditingTitle && (
-            <Box>
-              <Tooltip title="Delete chat">
+        ) : (
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography variant="h6">{selectedChat?.title || 'New Chat'}</Typography>
+            {selectedChat && (
+              <Tooltip title="Rename chat">
                 <IconButton 
-                  onClick={() => setDeleteDialogOpen(true)}
-                  color="default"
-                  disabled={isLoading}
+                  size="small" 
+                  onClick={() => {
+                    setRenameChatTitle(selectedChat.title);
+                    setIsEditingTitle(true);
+                  }}
                 >
-                  <DeleteIcon />
+                  <EditIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
-            </Box>
-          )}
-        </Box>
+            )}
+          </Box>
+        )}
         
-        {/* Messages area */}
-        <Paper 
-          sx={{ 
-            flex: 1, 
-            mb: 2, 
-            mx: 2,
-            mt: 2,
-            p: 2, 
-            overflow: 'auto',
-            backgroundColor: 'background.default',
-            borderRadius: 2
-          }}
-        >
-          {!selectedChat || messages.length === 0 ? (
-            <Box 
-              sx={{ 
-                height: '100%', 
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center', 
-                alignItems: 'center',
-                color: 'text.secondary'
-              }}
+        {/* Delete button */}
+        {selectedChat && !isEditingTitle && (
+          <Tooltip title="Delete chat">
+            <IconButton 
+              onClick={() => setDeleteDialogOpen(true)}
+              color="default"
+              disabled={isLoading}
             >
-              <Typography variant="body1" sx={{ mb: 1 }}>
-                {selectedChat ? 'Start a new conversation' : 'Select or create a chat'}
-              </Typography>
-              <Typography variant="body2">
-                {selectedChat ? 'Ask me anything to help with your productivity tasks' : 'Use the sidebar to manage your conversations'}
-              </Typography>
-            </Box>
-          ) : (
-            <Box>
-              {messages.map((message, index) => (
-                <Box key={index} sx={{ mb: 2 }}>
-                  <Box 
-                    sx={{ 
-                      display: 'flex',
-                      alignItems: 'flex-start',
-                      mb: 0.5
-                    }}
-                  >
-                    <Avatar 
-                      sx={{ 
-                        mr: 1, 
-                        bgcolor: message.sender === 'ai' ? 'primary.main' : 'secondary.main',
-                        width: 32,
-                        height: 32
-                      }}
-                    >
-                      {message.sender === 'ai' ? 'AI' : 'U'}
-                    </Avatar>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography 
-                        variant="body1" 
-                        sx={{ 
-                          whiteSpace: 'pre-wrap',
-                          overflowWrap: 'break-word'
-                        }}
-                      >
-                        {message.content}
-                      </Typography>
-                      <Typography 
-                        variant="caption" 
-                        color="text.secondary"
-                        sx={{ display: 'block', mt: 0.5 }}
-                      >
-                        {formatTimestamp(message.timestamp)}
-                      </Typography>
-                    </Box>
-                  </Box>
-                  {index < messages.length - 1 && (
-                    <Divider sx={{ my: 2 }} />
-                  )}
-                </Box>
-              ))}
-              {isLoading && (
-                <Box sx={{ display: 'flex', alignItems: 'center', ml: 5 }}>
-                  <CircularProgress size={20} sx={{ mr: 2 }} />
-                  <Typography variant="body2">AI is thinking...</Typography>
-                </Box>
-              )}
-              <div ref={messagesEndRef} />
-            </Box>
-          )}
-        </Paper>
-        
-        {/* Message input */}
-        <Paper 
-          component="form" 
-          onSubmit={handleSubmit}
-          sx={{ 
-            p: 2, 
-            mx: 2,
-            mb: 2,
-            display: 'flex', 
-            alignItems: 'center',
-            borderRadius: 2
-          }}
-        >
-          <TextField
-            fullWidth
-            variant="outlined"
-            placeholder="Type your message..."
-            value={input}
-            onChange={handleInputChange}
-            disabled={isLoading || !selectedChat}
-            autoFocus
-            sx={{ mr: 1 }}
-            InputProps={{
-              endAdornment: isLoading && (
-                <InputAdornment position="end">
-                  <CircularProgress size={20} />
-                </InputAdornment>
-              )
-            }}
-          />
-          <Button 
-            type="submit" 
-            variant="contained" 
-            disabled={!input.trim() || isLoading || !selectedChat}
-            endIcon={<SendIcon />}
-          >
-            Send
-          </Button>
-        </Paper>
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
+        )}
       </Box>
       
-      {/* Delete chat confirmation dialog */}
+      {/* Messages area */}
+      <Paper 
+        sx={{ 
+          flex: 1, 
+          mb: 2, 
+          mx: 2,
+          mt: 2,
+          p: 2, 
+          overflow: 'auto',
+          backgroundColor: 'background.default',
+          borderRadius: 2
+        }}
+      >
+        {/* Messages content */}
+        {messages.map((message, index) => (
+          <Box key={index} sx={{ mb: 2 }}>
+            <Box 
+              sx={{ 
+                display: 'flex',
+                alignItems: 'flex-start',
+                mb: 0.5
+              }}
+            >
+              <Avatar 
+                sx={{ 
+                  mr: 1, 
+                  bgcolor: message.sender === 'ai' ? 'primary.main' : 'secondary.main',
+                  width: 32,
+                  height: 32
+                }}
+              >
+                {message.sender === 'ai' ? 'AI' : 'U'}
+              </Avatar>
+              <Box sx={{ flex: 1 }}>
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
+                    whiteSpace: 'pre-wrap',
+                    overflowWrap: 'break-word'
+                  }}
+                >
+                  {message.content}
+                </Typography>
+                <Typography 
+                  variant="caption" 
+                  color="text.secondary"
+                  sx={{ display: 'block', mt: 0.5 }}
+                >
+                  {formatTimestamp(message.timestamp)}
+                </Typography>
+              </Box>
+            </Box>
+            {index < messages.length - 1 && (
+              <Divider sx={{ my: 2 }} />
+            )}
+          </Box>
+        ))}
+        {isLoading && (
+          <Box sx={{ display: 'flex', alignItems: 'center', ml: 5 }}>
+            <CircularProgress size={20} sx={{ mr: 2 }} />
+            <Typography variant="body2">AI is thinking...</Typography>
+          </Box>
+        )}
+        <div ref={messagesEndRef} />
+      </Paper>
+      
+      {/* Message input */}
+      <Paper 
+        component="form" 
+        onSubmit={handleSubmit}
+        sx={{ 
+          p: 2, 
+          mx: 2,
+          mb: 2,
+          display: 'flex', 
+          alignItems: 'center',
+          borderRadius: 2
+        }}
+      >
+        <TextField
+          fullWidth
+          variant="outlined"
+          placeholder="Type your message..."
+          value={input}
+          onChange={handleInputChange}
+          disabled={isLoading || !selectedChat}
+          autoFocus
+          sx={{ mr: 1 }}
+          InputProps={{
+            endAdornment: isLoading && (
+              <InputAdornment position="end">
+                <CircularProgress size={20} />
+              </InputAdornment>
+            )
+          }}
+        />
+        <Button 
+          type="submit" 
+          variant="contained" 
+          disabled={!input.trim() || isLoading || !selectedChat}
+          endIcon={<SendIcon />}
+        >
+          Send
+        </Button>
+      </Paper>
+      
+      {/* Dialog for delete confirmation */}
       <Dialog
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
@@ -654,12 +555,19 @@ const AIChatPage: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleDeleteChat} color="error">
-            Delete
-          </Button>
+          <Button onClick={handleDeleteChat} color="error">Delete</Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </>
+  );
+
+  return (
+    <ToolWrapper
+      title="AI Chat"
+      sidebarContent={sidebarContent}
+      mainContent={mainContent}
+      sidebarWidth={drawerWidth}
+    />
   );
 };
 

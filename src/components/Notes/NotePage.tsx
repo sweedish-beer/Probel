@@ -5,6 +5,7 @@ import NotesList from './NotesList';
 import NoteEditor from './NoteEditor';
 import { Note, NewNote } from '../../types';
 import { notesService } from '../../services/notesService';
+import ToolWrapper from '../Layout/ToolWrapper';
 
 const NotePage: React.FC = () => {
     const [notes, setNotes] = useState<Note[]>([]);
@@ -44,7 +45,6 @@ const NotePage: React.FC = () => {
         }
     };
 
-
     const handleUpdateNote = async (id: string, updates: Partial<Note>) => {
         try {
             const updatedNote = await notesService.updateNote(id, updates);
@@ -77,59 +77,68 @@ const NotePage: React.FC = () => {
         setSelectedNote(null);
     };
 
-    return (
-        <Box sx={{ display: 'flex', height: '100%' }}>
-            {/* Notes List */}
-            <Box sx={{ width: 300, borderRight: 1, borderColor: 'divider', p: 2 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                    <Typography variant="h6">Notes</Typography>
-                    <Button
-                        variant="contained"
-                        size="small"
-                        onClick={handleNewNote}
-                    >
-                        New
-                    </Button>
+    // Extract sidebar content
+    const sidebarContent = (
+        <Box sx={{ p: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                <Typography variant="h6">Notes</Typography>
+                <Button
+                    variant="contained"
+                    size="small"
+                    onClick={handleNewNote}
+                >
+                    New
+                </Button>
+            </Box>
+
+            {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                    <CircularProgress size={24} />
                 </Box>
-
-                {loading ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-                        <CircularProgress size={24} />
-                    </Box>
-                ) : error ? (
-                    <Typography color="error">{error}</Typography>
-                ) : (
-                    <NotesList
-                        notes={notes}
-                        selectedNoteId={selectedNote?.id}
-                        onSelectNote={handleSelectNote}
-                    />
-                )}
-            </Box>
-
-            {/* Note Editor */}
-            <Box sx={{ flex: 1, p: 2 }}>
-                {isCreating ? (
-                    <NoteEditor
-                        onSave={handleCreateNote}
-                        onCancel={() => setIsCreating(false)}
-                    />
-                ) : selectedNote ? (
-                    <NoteEditor
-                        note={selectedNote}
-                        onSave={(updates) => handleUpdateNote(selectedNote.id, updates)}
-                        onDelete={() => handleDeleteNote(selectedNote.id)}
-                        onCancel={() => setSelectedNote(null)}
-                    />
-                ) : (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                        <Typography color="text.secondary">
-                            Select a note or create a new one
-                        </Typography>
-                    </Box>
-                )}
-            </Box>
+            ) : error ? (
+                <Typography color="error">{error}</Typography>
+            ) : (
+                <NotesList
+                    notes={notes}
+                    selectedNoteId={selectedNote?.id}
+                    onSelectNote={handleSelectNote}
+                />
+            )}
         </Box>
+    );
+
+    // Extract main content
+    const mainContent = (
+        <Box sx={{ height: '100%' }}>
+            {isCreating ? (
+                <NoteEditor
+                    onSave={handleCreateNote}
+                    onCancel={() => setIsCreating(false)}
+                />
+            ) : selectedNote ? (
+                <NoteEditor
+                    note={selectedNote}
+                    onSave={(updates) => handleUpdateNote(selectedNote.id, updates)}
+                    onDelete={() => handleDeleteNote(selectedNote.id)}
+                    onCancel={() => setSelectedNote(null)}
+                />
+            ) : (
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                    <Typography color="text.secondary">
+                        Select a note or create a new one
+                    </Typography>
+                </Box>
+            )}
+        </Box>
+    );
+
+    return (
+        <ToolWrapper
+            title="Notes"
+            sidebarContent={sidebarContent}
+            mainContent={mainContent}
+            sidebarWidth={300}
+        />
     );
 };
 
