@@ -5,7 +5,7 @@ import FlowchartsList from './FlowchartsList';
 import FlowchartEditor from './FlowchartEditor';
 import { Flowchart, NewFlowchart } from '../../types';
 import { flowchartService } from '../../services/flowchartService';
-
+import ToolWrapper from '../Layout/ToolWrapper';
 
 const FlowchartPage: React.FC = () => {
     const [flowcharts, setFlowcharts] = useState<Flowchart[]>([]);
@@ -34,7 +34,6 @@ const FlowchartPage: React.FC = () => {
 
     const handleCreateFlowchart = async (flowchartData: Partial<Flowchart>) => {
         try {
-            // Cast to NewFlowchart since we're ensuring all required fields are present
             const newFlowchart = await flowchartService.createFlowchart(flowchartData as NewFlowchart);
             setFlowcharts([newFlowchart, ...flowcharts]);
             setIsCreating(false);
@@ -77,66 +76,73 @@ const FlowchartPage: React.FC = () => {
         setSelectedFlowchart(null);
     };
 
-    return (
-        <Box sx={{ display: 'flex', height: '100%' }}>
-            {/* Flowcharts List */}
-            <Box sx={{ width: 300, borderRight: 1, borderColor: 'divider', p: 2 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                    <Typography variant="h6">Flowcharts</Typography>
-                    <Button
-                        variant="contained"
-                        size="small"
-                        onClick={handleNewFlowchart}
-                    >
-                        New
-                    </Button>
+    const sidebarContent = (
+        <Box sx={{ p: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                <Typography variant="h6">Flowcharts</Typography>
+                <Button
+                    variant="contained"
+                    size="small"
+                    onClick={handleNewFlowchart}
+                >
+                    New
+                </Button>
+            </Box>
+
+            {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                    <CircularProgress size={24} />
                 </Box>
-
-                {loading ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-                        <CircularProgress size={24} />
-                    </Box>
-                ) : error ? (
-                    <Typography color="error">{error}</Typography>
-                ) : (
-                    <FlowchartsList
-                        flowcharts={flowcharts}
-                        selectedFlowchartId={selectedFlowchart?.id}
-                        onSelectFlowchart={handleSelectFlowchart}
-                    />
-                )}
-            </Box>
-
-            {/* Flowchart Editor */}
-            <Box sx={{ flex: 1, p: 2, height: '100%' }}>
-                {isCreating ? (
-                    <FlowchartEditor
-                        onSave={handleCreateFlowchart}
-                        onCancel={() => setIsCreating(false)}
-                    />
-                ) : selectedFlowchart ? (
-                    <FlowchartEditor
-                        flowchart={selectedFlowchart}
-                        onSave={(updates) => handleUpdateFlowchart(selectedFlowchart.id, updates)}
-                        onDelete={() => handleDeleteFlowchart(selectedFlowchart.id)}
-                        onCancel={() => setSelectedFlowchart(null)}
-                    />
-                ) : (
-                    <Box sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        height: '100%',
-                        backgroundColor: 'background.paper',
-                        borderRadius: 2
-                    }}>
-                        <Typography color="text.secondary">
-                            Select a flowchart or create a new one
-                        </Typography>
-                    </Box>
-                )}
-            </Box>
+            ) : error ? (
+                <Typography color="error">{error}</Typography>
+            ) : (
+                <FlowchartsList
+                    flowcharts={flowcharts}
+                    selectedFlowchartId={selectedFlowchart?.id}
+                    onSelectFlowchart={handleSelectFlowchart}
+                />
+            )}
         </Box>
+    );
+
+    const mainContent = (
+        <Box sx={{ height: '100%' }}>
+            {isCreating ? (
+                <FlowchartEditor
+                    onSave={handleCreateFlowchart}
+                    onCancel={() => setIsCreating(false)}
+                />
+            ) : selectedFlowchart ? (
+                <FlowchartEditor
+                    flowchart={selectedFlowchart}
+                    onSave={(updates) => handleUpdateFlowchart(selectedFlowchart.id, updates)}
+                    onDelete={() => handleDeleteFlowchart(selectedFlowchart.id)}
+                    onCancel={() => setSelectedFlowchart(null)}
+                />
+            ) : (
+                <Box sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '100%',
+                    backgroundColor: 'background.paper',
+                    borderRadius: 2
+                }}>
+                    <Typography color="text.secondary">
+                        Select a flowchart or create a new one
+                    </Typography>
+                </Box>
+            )}
+        </Box>
+    );
+
+    return (
+        <ToolWrapper
+            title="Flowcharts"
+            sidebarContent={sidebarContent}
+            mainContent={mainContent}
+            sidebarWidth={300}
+        />
     );
 };
 

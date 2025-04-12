@@ -1,40 +1,51 @@
 // src/components/Layout/MainLayout.tsx
 import { useState } from 'react';
-import { Box, Drawer, AppBar, Toolbar, IconButton, Typography, CircularProgress } from '@mui/material';
+import {
+  Box,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Typography,
+  Drawer,
+  CircularProgress,
+  useMediaQuery,
+  useTheme
+} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useAuth } from '../../contexts/AuthContext';
 import AuthPage from '../../pages/AuthPage';
-import NotePage from '../Notes/NotePage';
-import FlowchartPage from '../Flowchart/FlowchartPage';
-import AIChatPage from '../AI/AIChatPage';
 import Sidebar from './Sidebar';
+import WorkspaceManager from './WorkspaceManager';
 
 const MainLayout = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
   const { user, loading } = useAuth();
-  const [open, setOpen] = useState(true);
-  const [activePage, setActivePage] = useState('notes');
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [workspaceManagerRef, setWorkspaceManagerRef] = useState<any>(null);
 
   if (loading) {
-    return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-      <CircularProgress />
-    </Box>;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (!user) {
     return <AuthPage />;
   }
 
-  const renderContent = () => {
-    switch (activePage) {
-      case 'notes':
-        return <NotePage />;
-      case 'flowcharts':
-        return <FlowchartPage />;
-      case 'ai-chat':
-        return <AIChatPage />;
-      default:
-        return <NotePage />;
+  const handleSelectTool = (toolType: 'notes' | 'flowchart' | 'ai-chat', addToSide: boolean) => {
+    if (workspaceManagerRef && workspaceManagerRef.addTool) {
+      workspaceManagerRef.addTool(toolType, addToSide);
+    }
+
+    // On mobile, close sidebar after selection
+    if (isMobile) {
+      setSidebarOpen(false);
     }
   };
 
@@ -44,43 +55,62 @@ const MainLayout = () => {
         <Toolbar>
           <IconButton
             color="inherit"
-            aria-label="toggle drawer"
-            onClick={() => setOpen(!open)}
+            aria-label="toggle sidebar"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
             edge="start"
             sx={{ mr: 2 }}
           >
-            {open ? <ChevronLeftIcon /> : <MenuIcon />}
+            <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
+
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+            sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
+          >
             pro bel
           </Typography>
+
+          <IconButton color="inherit">
+            <AccountCircleIcon />
+          </IconButton>
         </Toolbar>
       </AppBar>
-      
+
       <Drawer
-        variant="permanent"
+        variant={isMobile ? "temporary" : "persistent"}
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
         sx={{
-          width: open ? 240 : 64,
+          width: sidebarOpen ? (collapsed ? 64 : 240) : 0,
           flexShrink: 0,
           '& .MuiDrawer-paper': {
-            width: open ? 240 : 64,
+            width: collapsed ? 64 : 240,
             boxSizing: 'border-box',
-            transition: 'width 0.2s'
+            transition: 'width 0.3s',
+            borderRight: '1px solid',
+            borderColor: 'divider',
           },
         }}
-        open={open}
       >
         <Toolbar /> {/* Spacer to push content below AppBar */}
-        <Sidebar 
-          onNavigate={setActivePage} 
-          activePage={activePage} 
-          collapsed={!open} 
+        <Sidebar
+          collapsed={collapsed}
+          onToggleCollapse={() => setCollapsed(!collapsed)}
+          onSelectTool={handleSelectTool}
         />
       </Drawer>
-      
-      <Box component="main" sx={{ flexGrow: 1, p: 3, overflow: 'hidden' }}>
+
+      <Box component="main" sx={{
+        flexGrow: 1,
+        p: 3,
+        width: { sm: `calc(100% - ${sidebarOpen ? (collapsed ? 64 : 240) : 0}px)` },
+        height: '100%',
+        overflow: 'hidden'
+      }}>
         <Toolbar /> {/* Spacer to push content below AppBar */}
-        {renderContent()}
+        <WorkspaceManager ref={(ref) => setWorkspaceManagerRef(ref)} />
       </Box>
     </Box>
   );
