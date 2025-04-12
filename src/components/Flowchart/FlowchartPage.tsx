@@ -78,11 +78,11 @@ const FlowchartPage: React.FC = () => {
     };
 
     return (
-        <Box sx={{ display: 'flex', height: '100%' }}>
+        <Box sx={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
             {/* Flowcharts List */}
-            <Box sx={{ width: 300, borderRight: 1, borderColor: 'divider', p: 2 }}>
+            <Box sx={{ width: 250, borderRight: 1, borderColor: 'divider', p: 2, overflow: 'auto' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                    <Typography variant="h6">Flowcharts</Typography>
+                    <Typography variant="subtitle1">Flowcharts</Typography>
                     <Button
                         variant="contained"
                         size="small"
