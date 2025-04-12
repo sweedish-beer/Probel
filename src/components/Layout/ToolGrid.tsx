@@ -1,6 +1,6 @@
 // src/components/Layout/ToolGrid.tsx
 import React from 'react';
-import { Box } from '@mui/material';
+import { Box, Typography, Button, Stack } from '@mui/material';
 import { Tool } from './WorkspaceManager';
 import NotePage from '../Notes/NotePage';
 import FlowchartPage from '../Flowchart/FlowchartPage';
@@ -12,19 +12,43 @@ interface ToolGridProps {
 }
 
 const ToolGrid: React.FC<ToolGridProps> = ({ tools, addTool }) => {
-  // If no tools, show empty message
+  // If no tools, show empty message with tool selection buttons
   if (tools.length === 0) {
     return (
       <Box
         sx={{
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
           height: '100%',
-          color: 'text.secondary'
+          gap: 3
         }}
       >
-        Select a tool from the sidebar to get started
+        <Typography color="text.secondary">
+          Select a tool to get started
+        </Typography>
+        
+        <Stack direction="row" spacing={2}>
+          <Button 
+            variant="outlined" 
+            onClick={() => addTool('notes', false)}
+          >
+            Notes
+          </Button>
+          <Button 
+            variant="outlined" 
+            onClick={() => addTool('flowchart', false)}
+          >
+            Flowchart
+          </Button>
+          <Button 
+            variant="outlined" 
+            onClick={() => addTool('ai-chat', false)}
+          >
+            AI Chat
+          </Button>
+        </Stack>
       </Box>
     );
   }
