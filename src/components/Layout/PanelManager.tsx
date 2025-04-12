@@ -112,6 +112,8 @@ const PanelManager: React.FC = () => {
             position: 'relative',
             overflow: 'hidden',
             bgcolor: 'background.default',
+            display: 'flex',
+            flexDirection: 'column',
             p: 2
         }}>
             {/* Render all panels */}
@@ -124,11 +126,11 @@ const PanelManager: React.FC = () => {
                     onClose={() => removePanel(panel.id)}
                     zIndex={activePanel === panel.id ? 1000 : 900 - index}
                     bringToFront={() => bringToFront(panel.id)}
+                    activePanel={activePanel === panel.id}
                 >
                     {panel.content}
                 </FloatingPanel>
             ))}
-
             {/* Speed dial for adding new panels */}
             <SpeedDial
                 ariaLabel="Add panel"

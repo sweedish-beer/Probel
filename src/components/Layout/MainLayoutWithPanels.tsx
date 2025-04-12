@@ -15,7 +15,8 @@ const MainLayoutWithPanels: React.FC = () => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        height: '100vh'
+        height: '100vh',
+        width: '100vw'
       }}>
         <CircularProgress />
       </Box>
@@ -27,7 +28,7 @@ const MainLayoutWithPanels: React.FC = () => {
   }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', width:'100vw' }}>
       <AppBar position="static" elevation={0}>
         <Toolbar>
           <Typography 
