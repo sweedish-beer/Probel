@@ -1,4 +1,4 @@
-// src/components/AIChat/AIChatPage.tsx
+// src/components/AI/AIChatPage.tsx
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   Box, 
@@ -30,8 +30,9 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import MenuIcon from '@mui/icons-material/Menu';
 import EditIcon from '@mui/icons-material/Edit';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import { aiService } from '../../services/aiService';
- // @ts-ignore-unused
+//@ts-expect-error
 import { chatService, Chat, ChatMessage } from '../../services/chatService';
 
 // Interface for local messages
@@ -71,7 +72,9 @@ const AIChatPage: React.FC = () => {
 
   // Handle window resize for drawer
   useEffect(() => {
-    setIsDrawerOpen(!isMobile);
+    if (!isMobile) {
+      setIsDrawerOpen(true);
+    }
   }, [isMobile]);
 
   // Load chat messages when selected chat changes
@@ -308,7 +311,14 @@ const AIChatPage: React.FC = () => {
   const chatListDrawer = (
     <Box sx={{ width: drawerWidth, overflow: 'auto' }}>
       <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h6">AI Chats</Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {!isMobile && (
+            <IconButton onClick={() => setIsDrawerOpen(false)} size="small">
+              <ChevronLeftIcon />
+            </IconButton>
+          )}
+          <Typography variant="h6">AI Chats</Typography>
+        </Box>
         <Button
           variant="contained"
           size="small"
@@ -405,7 +415,7 @@ const AIChatPage: React.FC = () => {
     <Box sx={{ height: '100%', display: 'flex' }}>
       {/* Chat list drawer */}
       <Drawer
-        variant={isMobile ? "temporary" : "permanent"}
+        variant={isMobile ? "temporary" : "persistent"}
         open={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         sx={{
@@ -414,6 +424,8 @@ const AIChatPage: React.FC = () => {
           '& .MuiDrawer-paper': {
             width: drawerWidth,
             boxSizing: 'border-box',
+            position: 'relative', // Make sure drawer is positioned within the container
+            height: '100%',
           },
         }}
       >
@@ -438,11 +450,12 @@ const AIChatPage: React.FC = () => {
           borderColor: 'divider'
         }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            {isMobile && (
-              <IconButton onClick={() => setIsDrawerOpen(true)} edge="start">
-                <MenuIcon />
-              </IconButton>
-            )}
+            <IconButton 
+              onClick={() => setIsDrawerOpen(!isDrawerOpen)} 
+              edge="start"
+            >
+              <MenuIcon />
+            </IconButton>
             
             {isEditingTitle ? (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -487,7 +500,7 @@ const AIChatPage: React.FC = () => {
           
           {selectedChat && !isEditingTitle && (
             <Box>
-              <Tooltip title="Clear chat">
+              <Tooltip title="Delete chat">
                 <IconButton 
                   onClick={() => setDeleteDialogOpen(true)}
                   color="default"
